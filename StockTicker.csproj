@@ -1,0 +1,26 @@
+<!--
+Copyright (c) 2025 Hugo Monteiro
+Licensed under the MIT License. See LICENSE file in the project root for license information.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <AssemblyTitle>BitTicker</AssemblyTitle>
+    <AssemblyDescription>Real-time cryptocurrency ticker with CoinMarketCap API</AssemblyDescription>
+    <AssemblyConfiguration>Release</AssemblyConfiguration>
+    <AssemblyCompany>Hugo Monteiro</AssemblyCompany>
+    <AssemblyProduct>BitTicker</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2025 Hugo Monteiro</AssemblyCopyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>

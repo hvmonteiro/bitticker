@@ -1,0 +1,64 @@
+<!--
+Copyright (c) 2025 Hugo Monteiro
+Licensed under the MIT License. See LICENSE file in the project root for license information.
+-->
+<Window x:Class="StockTicker.ConfigurationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configuration" Height="350" Width="500"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E1E"
+        ResizeMode="NoResize">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Configuration" 
+                   Foreground="White" FontSize="18" FontWeight="Bold" 
+                   Margin="0,0,0,20"/>
+
+        <TextBlock Grid.Row="1" Text="Crypto Currencies (comma separated symbols):" 
+                   Foreground="White" Margin="0,0,0,5"/>
+        
+        <TextBox Grid.Row="2" x:Name="CryptoTextBox" 
+                 Background="#2D2D2D" Foreground="White" 
+                 BorderBrush="#555555" BorderThickness="1"
+                 Padding="5" Height="30" Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="3" Text="Example: BTC,ETH,BNB,XRP,SOL" 
+                   Foreground="#888888" FontSize="10" Margin="0,0,0,15"/>
+
+        <TextBlock Grid.Row="4" Text="CoinMarketCap API Key (optional):" 
+                   Foreground="White" Margin="0,0,0,5"/>
+        
+        <TextBox Grid.Row="5" x:Name="ApiKeyTextBox" 
+                 Background="#2D2D2D" Foreground="White" 
+                 BorderBrush="#555555" BorderThickness="1"
+                 Padding="5" Height="30" Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="6" Text="Leave empty to use demo data" 
+                   Foreground="#888888" FontSize="10" Margin="0,0,0,15"/>
+
+        <StackPanel Grid.Row="8" Orientation="Horizontal" 
+                    HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="CancelButton" Content="Cancel" 
+                    Width="80" Height="30" Margin="0,0,10,0"
+                    Background="#555555" Foreground="White" 
+                    BorderBrush="#777777" Click="Cancel_Click"/>
+            <Button x:Name="SaveButton" Content="Save" 
+                    Width="80" Height="30"
+                    Background="#0078D4" Foreground="White" 
+                    BorderBrush="#0078D4" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
