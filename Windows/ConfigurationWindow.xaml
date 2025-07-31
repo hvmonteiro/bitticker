@@ -46,19 +46,47 @@ Licensed under the MIT License. See LICENSE file in the project root for license
                  BorderBrush="#555555" BorderThickness="1"
                  Padding="5" Height="30" Margin="0,0,0,10"/>
 
-        <TextBlock Grid.Row="6" Text="Leave empty to use demo data" 
+        <TextBlock Grid.Row="6" Text="Leave empty to use demo data. Lower refresh intervals may hit API rate limits." 
                    Foreground="#888888" FontSize="10" Margin="0,0,0,15"/>
 
-        <StackPanel Grid.Row="8" Orientation="Horizontal" 
-                    HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button x:Name="CancelButton" Content="Cancel" 
+        <!-- Button row with refresh interval -->
+        <Grid Grid.Row="8" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Refresh every" 
+                       Foreground="White" FontSize="12"
+                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+            
+            <TextBox Grid.Column="1" x:Name="RefreshIntervalTextBox" 
+                     Background="#2D2D2D" Foreground="White" 
+                     BorderBrush="#555555" BorderThickness="1"
+                     Padding="3" Height="30" Width="60"
+                     HorizontalContentAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     PreviewTextInput="RefreshIntervalTextBox_PreviewTextInput"
+                     PreviewKeyDown="RefreshIntervalTextBox_PreviewKeyDown"
+                     TextChanged="RefreshIntervalTextBox_TextChanged"/>
+            
+            <TextBlock Grid.Column="2" Text="minutes" 
+                       Foreground="White" FontSize="12"
+                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+
+            <Button Grid.Column="4" x:Name="CancelButton" Content="Cancel" 
                     Width="80" Height="30" Margin="0,0,10,0"
                     Background="#555555" Foreground="White" 
                     BorderBrush="#777777" Click="Cancel_Click"/>
-            <Button x:Name="SaveButton" Content="Save" 
+            
+            <Button Grid.Column="5" x:Name="SaveButton" Content="Save" 
                     Width="80" Height="30"
                     Background="#0078D4" Foreground="White" 
                     BorderBrush="#0078D4" Click="Save_Click"/>
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>

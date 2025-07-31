@@ -32,7 +32,7 @@ namespace StockTicker
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly DispatcherTimer _timer;
+        private DispatcherTimer _timer;
         private CoinMarketCapService _coinMarketCapService;
         private DisplayMode _currentMode = DisplayMode.All;
         private bool _lastCallWasError = false;
@@ -48,31 +48,55 @@ namespace StockTicker
             AllCryptos = new ObservableCollection<CryptoData>();
             DisplayedCryptos = new ObservableCollection<CryptoData>();
             
+            // Load configuration first
             LoadConfiguration();
             _coinMarketCapService = new CoinMarketCapService(Configuration.CoinMarketCapApiKey);
             
-            // Initial load
-            _ = LoadCryptoDataAsync();
+            // Set up timer with loaded configuration
+            SetupTimer();
             
-            // Set up timer for 5-minute updates
+            // Initial data load
+            _ = LoadCryptoDataAsync();
+        }
+
+        private void SetupTimer()
+        {
+            // Stop existing timer if it exists
+            _timer?.Stop();
+            
+            // Create new timer with configured interval
+            var intervalMinutes = Math.Max(1, Configuration.RefreshIntervalMinutes); // Ensure minimum 1 minute
             _timer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMinutes(5)
+                Interval = TimeSpan.FromMinutes(intervalMinutes)
             };
             _timer.Tick += async (s, e) => await LoadCryptoDataAsync();
             _timer.Start();
+            
+            System.Diagnostics.Debug.WriteLine($"Timer set to refresh every {intervalMinutes} minutes");
         }
 
         public void LoadConfiguration()
         {
             var oldApiKey = Configuration?.CoinMarketCapApiKey ?? "";
             var oldCryptos = Configuration?.CryptoCurrencies?.ToList() ?? new List<string>();
+            var oldRefreshInterval = Configuration?.RefreshIntervalMinutes ?? 0;
             
+            // Load configuration from file
             Configuration = ConfigurationService.LoadConfiguration();
             _currentMode = Configuration.LastDisplayMode;
 
+            // Ensure refresh interval has a valid value
+            if (Configuration.RefreshIntervalMinutes < 1 || Configuration.RefreshIntervalMinutes > 1440)
+            {
+                Configuration.RefreshIntervalMinutes = 5; // Default to 5 minutes if invalid
+                System.Diagnostics.Debug.WriteLine("Invalid refresh interval found, defaulting to 5 minutes");
+                ConfigurationService.SaveConfiguration(Configuration); // Save corrected configuration
+            }
+
             // Check if we need to recreate the service or refresh data
             bool shouldRefreshData = false;
+            bool shouldUpdateTimer = false;
 
             // Recreate service if API key changed
             if (oldApiKey != Configuration.CoinMarketCapApiKey)
@@ -80,12 +104,27 @@ namespace StockTicker
                 _coinMarketCapService?.Dispose();
                 _coinMarketCapService = new CoinMarketCapService(Configuration.CoinMarketCapApiKey);
                 shouldRefreshData = true;
+                System.Diagnostics.Debug.WriteLine($"API key changed, recreating service");
             }
 
             // Check if cryptocurrency list changed
             if (!oldCryptos.SequenceEqual(Configuration.CryptoCurrencies))
             {
                 shouldRefreshData = true;
+                System.Diagnostics.Debug.WriteLine("Cryptocurrency list changed");
+            }
+
+            // Check if refresh interval changed (only if we had a previous configuration)
+            if (oldRefreshInterval > 0 && oldRefreshInterval != Configuration.RefreshIntervalMinutes)
+            {
+                shouldUpdateTimer = true;
+                System.Diagnostics.Debug.WriteLine($"Refresh interval changed from {oldRefreshInterval} to {Configuration.RefreshIntervalMinutes} minutes");
+            }
+
+            // Update timer if interval changed (but not on initial load)
+            if (shouldUpdateTimer && _timer != null)
+            {
+                SetupTimer();
             }
 
             // Only refresh if configuration actually changed
@@ -99,10 +138,12 @@ namespace StockTicker
         {
             Configuration.LastDisplayMode = _currentMode;
             ConfigurationService.SaveConfiguration(Configuration);
+            System.Diagnostics.Debug.WriteLine("Configuration saved");
         }
 
         public async Task RefreshDataAsync()
         {
+            System.Diagnostics.Debug.WriteLine("Manual refresh requested");
             await LoadCryptoDataAsync();
         }
 
@@ -110,6 +151,7 @@ namespace StockTicker
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"Loading crypto data for {Configuration.CryptoCurrencies.Count} symbols");
                 var cryptoData = await _coinMarketCapService.GetCryptocurrencyDataAsync(Configuration.CryptoCurrencies);
                 
                 // Check if this is error data

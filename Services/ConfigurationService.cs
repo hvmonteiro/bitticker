@@ -41,7 +41,17 @@ namespace StockTicker
                 if (File.Exists(ConfigFilePath))
                 {
                     var json = File.ReadAllText(ConfigFilePath);
-                    return JsonSerializer.Deserialize<Configuration>(json) ?? new Configuration();
+                    var config = JsonSerializer.Deserialize<Configuration>(json) ?? new Configuration();
+                    
+                    // Validate and fix refresh interval if needed
+                    if (config.RefreshIntervalMinutes < 1 || config.RefreshIntervalMinutes > 1440)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Invalid refresh interval {config.RefreshIntervalMinutes} found in config, using default");
+                        config.RefreshIntervalMinutes = 5; // Default to 5 minutes
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Configuration loaded: {config.CryptoCurrencies.Count} cryptos, {config.RefreshIntervalMinutes}min refresh");
+                    return config;
                 }
             }
             catch (Exception ex)
@@ -49,6 +59,7 @@ namespace StockTicker
                 System.Diagnostics.Debug.WriteLine($"Error loading configuration: {ex.Message}");
             }
 
+            System.Diagnostics.Debug.WriteLine("Creating new default configuration");
             return new Configuration();
         }
 
@@ -68,6 +79,7 @@ namespace StockTicker
                 });
 
                 File.WriteAllText(ConfigFilePath, json);
+                System.Diagnostics.Debug.WriteLine($"Configuration saved: {configuration.CryptoCurrencies.Count} cryptos, {configuration.RefreshIntervalMinutes}min refresh, API key: {(!string.IsNullOrEmpty(configuration.CoinMarketCapApiKey) ? "SET" : "EMPTY")}");
             }
             catch (Exception ex)
             {

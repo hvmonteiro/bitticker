@@ -4,13 +4,13 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 
 ![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker.png?raw=true)
 
-![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-about.png?raw=true)
 
 
 ## Features
 
 ### Core Features
-- **Real-time cryptocurrency prices** from CoinMarketCap API with 5-minute refresh intervals
+
+- **Real-time cryptocurrency prices** from CoinMarketCap API with customizable refresh interval
 - **Customizable cryptocurrency selection** - Configure which cryptos to display
 - **Always-on-top window** that stays visible above other applications
 - **Instant manual refresh** - Right-click → Refresh for immediate data updates
@@ -18,6 +18,7 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 - **Demo mode support** - Works without API key using realistic simulated data
 
 ### Smart Interface Design
+
 - **Intelligent window sizing** - Automatically adjusts to fit ticker content
 - **Dynamic height adjustment** - Compact (45px) or standard (60px) based on scrollbar visibility
 - **Auto-scrolling ticker** - Smoothly scrolls left when content exceeds window width
@@ -27,27 +28,29 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 - **Color-coded price changes** - Green for gains, Red for losses with percentage display
 
 ### Advanced Scrolling & Navigation
+
 - **Smart scrollbar visibility** - Only appears on mouse hover when content overflows
 - **Horizontal scrolling** - Manual scroll control when mouse is over window
 - **Automatic ticker scrolling** - Continuous left scroll when window is narrower than content
 - **Smooth animations** - 20 FPS scrolling for fluid movement
 
 ### User Experience
+
 - **Right-click context menu** with intuitive menu:
   - **Refresh** (first for quick access)
   - **Configure** (settings)
   - **About** (application info with author and license)
   - **Exit** (application control)
 
-![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-configuration.png?raw=true)
-
-
 ### Configuration & Customization
+
 - **CoinMarketCap API integration** - Use your own API key for real data
 - **Persistent settings** - Remembers window position, size, and selected cryptocurrencies
 - **Flexible cryptocurrency input** - Comma-separated symbols (e.g., BTC,ETH,BNB)
 - **Window position memory** - Restores last position and size on startup
 - **User-controlled width** - Respects manual window resizing preferences
+
+![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-configuration.png?raw=true)
 
 ## Prerequisites
 
@@ -58,51 +61,58 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 ## Installation
 
 ### Option 1: Download Release
+
 1. Go to [Releases](../../releases)
 2. Download the latest `BitTicker-vX.X.X.zip`
 3. Extract to your desired location
 4. Run `BitTicker.exe`
 
 ### Option 2: Build from Source
+
 1. Clone the repository:
-```
-git clone https://github.com/hvmonteiro/BitTicker.git
-cd BitTicker
-```
+   
+   ```
+   git clone https://github.com/hvmonteiro/BitTicker.git
+   cd BitTicker
+   ```
 
 2. Install .NET 6 SDK if not already installed:
 - Download from [Microsoft .NET Downloads](https://dotnet.microsoft.com/download/dotnet/6.0)
-
 3. Restore dependencies:
-```
-dotnet restore
-```
+   
+   ```
+   dotnet restore
+   ```
 
 4. Build the application:
-```
-dotnet build --configuration Release
-```
+   
+   ```
+   dotnet build --configuration Release
+   ```
 
 5. Run the application:
-```
-dotnet run
-```
-
+   
+   ```
+   dotnet run
+   ```
 
 ## Configuration
 
 ### API Key Setup (Recommended)
+
 1. Get a free API key from [CoinMarketCap API](https://coinmarketcap.com/api/)
 2. Right-click the ticker window → **Configure**
 3. Enter your API key in the configuration dialog
 4. Save settings
 
 ### Cryptocurrency Selection
+
 1. Right-click the ticker window → **Configure**
 2. Enter cryptocurrency symbols separated by commas (e.g., `BTC,ETH,BNB,XRP,SOL`)
 3. Click **Save**
 
 ### Default Cryptocurrencies
+
 - Bitcoin (BTC)
 - Ethereum (ETH)
 - BNB (BNB)
@@ -116,10 +126,10 @@ dotnet run
 
 *All cryptocurrencies are fully customizable through the configuration dialog.*
 
-
 ## Usage
 
 ### Basic Operations
+
 - **Move window**: Left-click and drag anywhere on the ticker
 - **Configure**: Right-click → Configure
 - **Refresh data**: Right-click → Refresh
@@ -127,12 +137,14 @@ dotnet run
 - **Exit**: Right-click → Exit
 
 ### Keyboard Shortcuts
+
 - **Right-click**: Context menu
 - **Alt+F4**: Close application
 
 ## Technical Details
 
 ### Built With
+
 - **Framework**: WPF (.NET 6)
 - **Language**: C#
 - **API**: CoinMarketCap Professional API
@@ -140,6 +152,7 @@ dotnet run
 - **Architecture**: MVVM Pattern
 
 ### Project Structure
+
 ```
 BitTicker/
 ├── Models/
@@ -157,9 +170,10 @@ BitTicker/
 └── App.xaml # Application entry point
 ```
 
-
 ### Configuration File
+
 Settings are stored in: `%AppData%\StockTicker\config.json`
+
 ```
 {
 "CryptoCurrencies": ["BTC", "ETH", "BNB"],
@@ -173,20 +187,24 @@ Settings are stored in: `%AppData%\StockTicker\config.json`
 ## Development
 
 ### Prerequisites for Development
+
 - **Visual Studio 2022** or **Visual Studio Code**
 - **.NET 6.0 SDK**
 - **Git**
 
 ### Development Setup
+
 1. Fork the repository
 2. Clone your fork:
-```
-git clone https://github.com/yourusername/BitTicker.git
-```
+   
+   ```
+   git clone https://github.com/yourusername/BitTicker.git
+   ```
 3. Open in Visual Studio or VS Code
 4. Build and run with F5
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Commit your changes: `git commit -m 'Add amazing feature'`
@@ -198,35 +216,42 @@ git clone https://github.com/yourusername/BitTicker.git
 ### Common Issues
 
 **Application won't start**
+
 - Ensure .NET 6.0 Runtime is installed
 - Check Windows Defender/Antivirus settings
 
 **No price data showing**
+
 - Verify internet connection
 - Check API key validity in configuration
 - Try using demo mode (remove API key)
 
 **Window positioning issues**
+
 - Delete configuration file: `%AppData%\StockTicker\config.json`
 - Restart application
 
 **High CPU usage**
+
 - Check network connectivity to CoinMarketCap API
 - Verify API key hasn't exceeded rate limits
 
 ## API Rate Limits
 
 ### Free Tier (No API Key)
+
 - Uses demo data only
 - No rate limits
 - Simulated price changes
 
 ### CoinMarketCap Free Plan
+
 - 333 calls/day
 - 10,000 calls/month
 - Updates every 5 minutes = ~288 calls/day
 
 ### CoinMarketCap Paid Plans
+
 - Higher rate limits available
 - Real-time data options
 - Professional features
@@ -238,6 +263,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Author
 
 **Hugo Monteiro**
+
 - GitHub: [@hvmonteiro](https://github.com/hvmonteiro)
 
 ## Acknowledgments
@@ -249,6 +275,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Version History
 
 ### v1.0.0 (2025-07-31)
+
 - Initial release
 - Real-time cryptocurrency ticker
 - CoinMarketCap API integration

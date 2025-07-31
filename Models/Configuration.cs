@@ -36,5 +36,12 @@ namespace StockTicker
         public double WindowWidth { get; set; } = 800;
         public DisplayMode LastDisplayMode { get; set; } = DisplayMode.All;
         public string CoinMarketCapApiKey { get; set; } = "";
+        
+        private int _refreshIntervalMinutes = 5;
+        public int RefreshIntervalMinutes 
+        { 
+            get => _refreshIntervalMinutes;
+            set => _refreshIntervalMinutes = value >= 1 && value <= 1440 ? value : 5;
+        }
     }
 }
