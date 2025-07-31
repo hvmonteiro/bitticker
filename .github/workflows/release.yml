@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+        
+    - name: Extract version from tag
+      id: version
+      run: |
+        $version = "${{ github.ref_name }}" -replace '^v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Version: $version"
+      shell: pwsh
+      
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build Release
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal
+      
+    - name: Publish Self-Contained
+      run: |
+        dotnet publish --configuration Release --runtime win-x64 --self-contained true --output ./publish-selfcontained
+        
+    - name: Publish Framework-Dependent
+      run: |
+        dotnet publish --configuration Release --runtime win-x64 --self-contained false --output ./publish-framework
+        
+    - name: Create Self-Contained Archive
+      run: |
+        Compress-Archive -Path ./publish-selfcontained/* -DestinationPath BitTicker-v${{ steps.version.outputs.VERSION }}-self-contained.zip
+      shell: pwsh
+      
+    - name: Create Framework-Dependent Archive
+      run: |
+        Compress-Archive -Path ./publish-framework/* -DestinationPath BitTicker-v${{ steps.version.outputs.VERSION }}-framework-dependent.zip
+      shell: pwsh
+      
+    - name: Generate Release Notes
+      id: release_notes
+      run: |
+        $notes = @"
+        ## BitTicker v${{ steps.version.outputs.VERSION }}
+        
+        ### Downloads
+        - **BitTicker-v${{ steps.version.outputs.VERSION }}-self-contained.zip**: Complete standalone application (no .NET runtime required)
+        - **BitTicker-v${{ steps.version.outputs.VERSION }}-framework-dependent.zip**: Requires .NET 6 runtime to be installed
+        
+        ### Installation
+        1. Download the appropriate version for your system
+        2. Extract the ZIP file to your desired location
+        3. Run `StockTicker.exe` to start the application
+        
+        ### Self-Contained vs Framework-Dependent
+        - **Self-Contained**: Larger download (~100MB) but includes everything needed to run
+        - **Framework-Dependent**: Smaller download (~1MB) but requires .NET 6 Desktop Runtime
+        
+        ### System Requirements
+        - Windows 10 version 1809 or later
+        - Windows 11 (all versions)
+        - .NET 6 Desktop Runtime (for framework-dependent version only)
+        
+        ### Features
+        - Real-time cryptocurrency price ticker
+        - CoinMarketCap API integration
+        - Customizable cryptocurrency selection
+        - Auto-scrolling ticker with smart window sizing
+        - Persistent configuration and window positioning
+        "@
+        
+        $notes | Out-File -FilePath release_notes.md -Encoding UTF8
+        echo "RELEASE_NOTES<<EOF" >> $env:GITHUB_OUTPUT
+        Get-Content release_notes.md | ForEach-Object { echo $_ >> $env:GITHUB_OUTPUT }
+        echo "EOF" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: BitTicker ${{ steps.version.outputs.VERSION }}
+        body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+        draft: false
+        prerelease: false
+        files: |
+          BitTicker-v${{ steps.version.outputs.VERSION }}-self-contained.zip
+          BitTicker-v${{ steps.version.outputs.VERSION }}-framework-dependent.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
