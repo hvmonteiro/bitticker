@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:  # Add this for manual triggering
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.1)'
+        required: true
+        default: 'v1.0.1'
 
 jobs:
   release:
@@ -18,10 +24,14 @@ jobs:
       with:
         dotnet-version: '6.0.x'
         
-    - name: Extract version from tag
+    - name: Extract version from tag or input
       id: version
       run: |
-        $version = "${{ github.ref_name }}" -replace '^v', ''
+        if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+          $version = "${{ github.event.inputs.version }}" -replace '^v', ''
+        } else {
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+        }
         echo "VERSION=$version" >> $env:GITHUB_OUTPUT
         echo "Version: $version"
       shell: pwsh
