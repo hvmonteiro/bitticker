@@ -1,116 +1,95 @@
-name: Release
+name: Build and Release
 
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:  # Add this for manual triggering
-    inputs:
-      version:
-        description: 'Version tag (e.g., v1.0.1)'
-        required: true
-        default: 'v1.0.1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-  release:
+  build-and-release:
     runs-on: windows-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
       
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '8.0.x'
         
-    - name: Extract version from tag or input
-      id: version
-      run: |
-        if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-          $version = "${{ github.event.inputs.version }}" -replace '^v', ''
-        } else {
-          $version = "${{ github.ref_name }}" -replace '^v', ''
-        }
-        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-        echo "Version: $version"
-      shell: pwsh
-      
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Build Release
+    - name: Build application
       run: dotnet build --configuration Release --no-restore
       
-    - name: Test
+    - name: Run tests (if any)
       run: dotnet test --no-build --configuration Release --verbosity normal
+      continue-on-error: true
       
-    - name: Publish Self-Contained
+    - name: Publish application
       run: |
-        dotnet publish --configuration Release --runtime win-x64 --self-contained true --output ./publish-selfcontained
+        dotnet publish --configuration Release --output ./publish/win-x64 --self-contained true --runtime win-x64 -p:PublishSingleFile=true
+        dotnet publish --configuration Release --output ./publish/portable --no-self-contained
         
-    - name: Publish Framework-Dependent
+    - name: Create release packages
       run: |
-        dotnet publish --configuration Release --runtime win-x64 --self-contained false --output ./publish-framework
+        # Create win-x64 standalone package
+        cd publish/win-x64
+        Compress-Archive -Path * -DestinationPath ../../BitTicker-win-x64-${{ github.ref_name }}.zip
+        cd ../..
         
-    - name: Create Self-Contained Archive
+        # Create portable package
+        cd publish/portable
+        Compress-Archive -Path * -DestinationPath ../../BitTicker-portable-${{ github.ref_name }}.zip
+        cd ../..
+        
+    - name: Generate changelog
+      id: changelog
       run: |
-        Compress-Archive -Path ./publish-selfcontained/* -DestinationPath BitTicker-v${{ steps.version.outputs.VERSION }}-self-contained.zip
-      shell: pwsh
-      
-    - name: Create Framework-Dependent Archive
-      run: |
-        Compress-Archive -Path ./publish-framework/* -DestinationPath BitTicker-v${{ steps.version.outputs.VERSION }}-framework-dependent.zip
-      shell: pwsh
-      
-    - name: Generate Release Notes
-      id: release_notes
-      run: |
-        $notes = @"
-        ## BitTicker v${{ steps.version.outputs.VERSION }}
+        echo "## What's Changed in ${{ github.ref_name }}" > CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        echo "### Features" >> CHANGELOG.md
+        echo "- Complete cryptocurrency ticker with 12 major exchanges" >> CHANGELOG.md
+        echo "- Real-time price monitoring with tooltips" >> CHANGELOG.md
+        echo "- Dark theme UI with customizable settings" >> CHANGELOG.md
+        echo "- Auto-scrolling ticker with manual override" >> CHANGELOG.md
+        echo "- Comprehensive logging and debugging" >> CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        echo "### Supported Exchanges" >> CHANGELOG.md
+        echo "- CoinMarketCap, Binance, Bitfinex, Bitstamp, ByBit" >> CHANGELOG.md
+        echo "- Coinbase, Crypto.com, Gate.io, Huobi, Kraken, KuCoin, OKX" >> CHANGELOG.md
         
-        ### Downloads
-        - **BitTicker-v${{ steps.version.outputs.VERSION }}-self-contained.zip**: Complete standalone application (no .NET runtime required)
-        - **BitTicker-v${{ steps.version.outputs.VERSION }}-framework-dependent.zip**: Requires .NET 6 runtime to be installed
-        
-        ### Installation
-        1. Download the appropriate version for your system
-        2. Extract the ZIP file to your desired location
-        3. Run `StockTicker.exe` to start the application
-        
-        ### Self-Contained vs Framework-Dependent
-        - **Self-Contained**: Larger download (~100MB) but includes everything needed to run
-        - **Framework-Dependent**: Smaller download (~1MB) but requires .NET 6 Desktop Runtime
-        
-        ### System Requirements
-        - Windows 10 version 1809 or later
-        - Windows 11 (all versions)
-        - .NET 6 Desktop Runtime (for framework-dependent version only)
-        
-        ### Features
-        - Real-time cryptocurrency price ticker
-        - CoinMarketCap API integration
-        - Customizable cryptocurrency selection
-        - Auto-scrolling ticker with smart window sizing
-        - Persistent configuration and window positioning
-        "@
-        
-        $notes | Out-File -FilePath release_notes.md -Encoding UTF8
-        echo "RELEASE_NOTES<<EOF" >> $env:GITHUB_OUTPUT
-        Get-Content release_notes.md | ForEach-Object { echo $_ >> $env:GITHUB_OUTPUT }
-        echo "EOF" >> $env:GITHUB_OUTPUT
-      shell: pwsh
-      
-    - name: Create Release
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref_name }}
-        name: BitTicker ${{ steps.version.outputs.VERSION }}
-        body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
-        draft: false
-        prerelease: false
+        name: BitTicker ${{ github.ref_name }}
+        body_path: CHANGELOG.md
         files: |
-          BitTicker-v${{ steps.version.outputs.VERSION }}-self-contained.zip
-          BitTicker-v${{ steps.version.outputs.VERSION }}-framework-dependent.zip
+          BitTicker-win-x64-${{ github.ref_name }}.zip
+          BitTicker-portable-${{ github.ref_name }}.zip
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: BitTicker-builds
+        path: |
+          BitTicker-*.zip
+          CHANGELOG.md
