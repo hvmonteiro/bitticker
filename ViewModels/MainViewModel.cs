@@ -28,7 +28,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace StockTicker
+namespace BitTicker
 {
     public class MainViewModel : INotifyPropertyChanged
     {

@@ -26,7 +26,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace StockTicker
+namespace BitTicker
 {
     public partial class LogWindow : Window, INotifyPropertyChanged
     {

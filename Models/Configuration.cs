@@ -22,7 +22,7 @@ SOFTWARE.
 
 using System.Collections.Generic;
 
-namespace StockTicker
+namespace BitTicker
 {
     public class Configuration
     {
@@ -36,8 +36,8 @@ namespace StockTicker
         public double WindowWidth { get; set; } = 800;
         public DisplayMode LastDisplayMode { get; set; } = DisplayMode.All;
 
-        // Selected exchange API - Default to CoinMarketCap
-        public string SelectedExchangeApi { get; set; } = ExchangeInfo.CoinMarketCap;
+        // Selected exchange API - Default to Binance
+        public string SelectedExchangeApi { get; set; } = ExchangeInfo.Binance;
 
         // Dictionary to store API keys for each exchange
         public Dictionary<string, string> ExchangeApiKeys { get; set; } = new Dictionary<string, string>();

@@ -5,7 +5,7 @@ Licensed under the MIT License. See LICENSE file in the project root for license
 
 using System;
 
-namespace StockTicker
+namespace BitTicker
 {
     public static class ExchangeServiceFactory
     {

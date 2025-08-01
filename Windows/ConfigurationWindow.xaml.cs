@@ -29,7 +29,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace StockTicker
+namespace BitTicker
 {
     public partial class ConfigurationWindow : Window
     {

@@ -26,7 +26,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace StockTicker
+namespace BitTicker
 {
     public interface ICryptoExchangeService : IDisposable
     {

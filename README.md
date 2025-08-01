@@ -192,7 +192,7 @@ BitTicker/
 
 ### Configuration File
 
-Settings are stored in: `%AppData%\StockTicker\config.json`
+Settings are stored in: `%AppData%\BitTicker\config.json`
 
 ```
 {
@@ -248,7 +248,7 @@ Settings are stored in: `%AppData%\StockTicker\config.json`
 
 **Window positioning issues**
 
-- Delete configuration file: `%AppData%\StockTicker\config.json`
+- Delete configuration file: `%AppData%\BitTicker\config.json`
 - Restart application
 
 **High CPU usage**

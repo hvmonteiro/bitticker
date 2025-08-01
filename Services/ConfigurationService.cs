@@ -8,13 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace StockTicker
+namespace BitTicker
 {
     public static class ConfigurationService
     {
         private static readonly string ConfigFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "StockTicker",
+            "BitTicker",
             "config.json"
         );
 

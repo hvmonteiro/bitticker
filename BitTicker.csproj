@@ -10,13 +10,13 @@ Licensed under the MIT License. See LICENSE file in the project root for license
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <AssemblyTitle>BitTicker</AssemblyTitle>
-    <AssemblyDescription>Real-time cryptocurrency ticker with CoinMarketCap API</AssemblyDescription>
+    <AssemblyDescription>BitTicker is a lightweight and customizable cryptocurrency price ticker for Windows.</AssemblyDescription>
     <AssemblyConfiguration>Release</AssemblyConfiguration>
     <AssemblyCompany>Hugo Monteiro</AssemblyCompany>
     <AssemblyProduct>BitTicker</AssemblyProduct>
     <AssemblyCopyright>Copyright © 2025 Hugo Monteiro</AssemblyCopyright>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <AssemblyFileVersion>2.0.0</AssemblyFileVersion>
     <ApplicationIcon>images\bitticker.ico</ApplicationIcon>
   </PropertyGroup>
 

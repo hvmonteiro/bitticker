@@ -26,7 +26,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace StockTicker
+namespace BitTicker
 {
     public partial class MainWindow : Window
     {

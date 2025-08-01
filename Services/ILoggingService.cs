@@ -22,7 +22,7 @@ SOFTWARE.
 
 using System;
 
-namespace StockTicker
+namespace BitTicker
 {
     public enum LogLevel
     {

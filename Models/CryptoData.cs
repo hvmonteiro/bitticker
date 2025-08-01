@@ -23,7 +23,7 @@ SOFTWARE.
 using System;
 using System.ComponentModel;
 
-namespace StockTicker
+namespace BitTicker
 {
     public class CryptoData : INotifyPropertyChanged
     {

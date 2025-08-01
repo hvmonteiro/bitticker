@@ -23,7 +23,7 @@ SOFTWARE.
 // All exchange services are now fully implemented!
 // This file can be deleted as all placeholder services have been replaced with working implementations.
 
-namespace StockTicker
+namespace BitTicker
 {
     // No placeholder services remain - all exchanges are fully implemented!
 }

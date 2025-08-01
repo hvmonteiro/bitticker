@@ -23,7 +23,7 @@ SOFTWARE.
 using System.Diagnostics;
 using System.Windows;
 
-namespace StockTicker
+namespace BitTicker
 {
     public partial class AboutWindow : Window
     {

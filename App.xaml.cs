@@ -22,7 +22,7 @@ SOFTWARE.
 
 using System.Windows;
 
-namespace StockTicker
+namespace BitTicker
 {
     public partial class App : Application
     {
