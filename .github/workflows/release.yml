@@ -73,7 +73,7 @@ jobs:
         echo "- Coinbase, Crypto.com, Gate.io, Huobi, Kraken, KuCoin, OKX" >> CHANGELOG.md
         
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         name: BitTicker ${{ github.ref_name }}
         body_path: CHANGELOG.md
