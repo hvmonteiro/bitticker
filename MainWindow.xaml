@@ -20,6 +20,7 @@ Licensed under the MIT License. See LICENSE file in the project root for license
             <MenuItem Header="Refresh" Click="Refresh_Click"/>
             <Separator/>
             <MenuItem Header="Configure" Click="Configure_Click"/>
+            <MenuItem Header="Show Logs" Click="ShowLogs_Click"/>
             <Separator/>
             <MenuItem Header="About" Click="About_Click"/>
             <Separator/>
@@ -47,7 +48,22 @@ Licensed under the MIT License. See LICENSE file in the project root for license
                     
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="5,0" Padding="10,5">
+                            <Border Margin="5,0" Padding="10,5"
+                                    ToolTipService.InitialShowDelay="500"
+                                    ToolTipService.ShowDuration="10000"
+                                    ToolTipService.BetweenShowDelay="1000">
+                                <Border.ToolTip>
+                                    <ToolTip Background="#2D2D2D" 
+                                             BorderBrush="#555555" 
+                                             BorderThickness="1"
+                                             Foreground="White"
+                                             FontFamily="Consolas, Courier New"
+                                             FontSize="11"
+                                             Padding="8">
+                                        <TextBlock Text="{Binding TooltipData}" 
+                                                   TextWrapping="NoWrap"/>
+                                    </ToolTip>
+                                </Border.ToolTip>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Symbol}" 
                                               Foreground="White" 

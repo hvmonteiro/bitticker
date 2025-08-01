@@ -21,6 +21,7 @@ SOFTWARE.
 */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -33,24 +34,142 @@ namespace StockTicker
     public partial class ConfigurationWindow : Window
     {
         private Configuration _configuration;
+        private string _currentSelectedExchange = string.Empty;
+        private readonly string _originalExchange = string.Empty;
 
         public ConfigurationWindow(Configuration configuration)
         {
             InitializeComponent();
             _configuration = configuration;
+            _originalExchange = configuration.SelectedExchangeApi ?? ExchangeInfo.CoinMarketCap;
+            InitializeExchangeComboBox();
             LoadCurrentSettings();
+        }
+
+        private void InitializeExchangeComboBox()
+        {
+            // Clear and populate ComboBox with exchanges
+            ExchangeComboBox.Items.Clear();
+            foreach (var exchange in ExchangeInfo.Exchanges)
+            {
+                ExchangeComboBox.Items.Add(exchange);
+                System.Diagnostics.Debug.WriteLine($"Added exchange to ComboBox: {exchange}");
+            }
         }
 
         private void LoadCurrentSettings()
         {
             // Load crypto currencies (first field)
-            CryptoTextBox.Text = string.Join(", ", _configuration.CryptoCurrencies);
+            CryptoTextBox.Text = string.Join(", ", _configuration.CryptoCurrencies ?? new List<string>());
             
-            // Load API key (second field)
-            ApiKeyTextBox.Text = _configuration.CoinMarketCapApiKey;
+            // Load selected exchange (second field)
+            var selectedExchange = _configuration.SelectedExchangeApi ?? ExchangeInfo.CoinMarketCap;
+            System.Diagnostics.Debug.WriteLine($"Loading configuration with selected exchange: '{selectedExchange}'");
             
-            // Load refresh interval (third field - in button row)
+            _currentSelectedExchange = selectedExchange;
+            
+            // Find and select the exchange in the ComboBox
+            bool found = false;
+            for (int i = 0; i < ExchangeComboBox.Items.Count; i++)
+            {
+                var itemText = ExchangeComboBox.Items[i]?.ToString();
+                System.Diagnostics.Debug.WriteLine($"ComboBox item {i}: '{itemText}' (comparing with '{selectedExchange}')");
+                
+                if (itemText == selectedExchange)
+                {
+                    ExchangeComboBox.SelectedIndex = i;
+                    System.Diagnostics.Debug.WriteLine($"Selected ComboBox index {i} for exchange '{selectedExchange}'");
+                    found = true;
+                    break;
+                }
+            }
+            
+            // If not found, select first item (CoinMarketCap)
+            if (!found && ExchangeComboBox.Items.Count > 0)
+            {
+                ExchangeComboBox.SelectedIndex = 0;
+                _currentSelectedExchange = ExchangeComboBox.Items[0]?.ToString() ?? ExchangeInfo.CoinMarketCap;
+                System.Diagnostics.Debug.WriteLine($"Exchange not found, defaulting to index 0: '{_currentSelectedExchange}'");
+            }
+            
+            // Load API key for selected exchange (third field)
+            LoadApiKeyForExchange(_currentSelectedExchange);
+            
+            // Update label for selected exchange
+            UpdateApiKeyLabel(_currentSelectedExchange);
+            
+            // Load refresh interval (fourth field - in button row)
             RefreshIntervalTextBox.Text = _configuration.RefreshIntervalMinutes.ToString();
+        }
+
+        private void LoadApiKeyForExchange(string exchangeName)
+        {
+            if (string.IsNullOrEmpty(exchangeName))
+            {
+                ApiKeyTextBox.Text = "";
+                return;
+            }
+
+            // Get API key for selected exchange
+            var apiKey = "";
+            if (_configuration.ExchangeApiKeys?.ContainsKey(exchangeName) == true)
+            {
+                apiKey = _configuration.ExchangeApiKeys[exchangeName] ?? "";
+            }
+
+            ApiKeyTextBox.Text = apiKey;
+            System.Diagnostics.Debug.WriteLine($"Loaded API key for {exchangeName}: {(!string.IsNullOrEmpty(apiKey) ? "SET" : "EMPTY")}");
+        }
+
+        private void ExchangeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ExchangeComboBox.SelectedItem is string selectedExchange)
+            {
+                System.Diagnostics.Debug.WriteLine($"=== EXCHANGE SELECTION CHANGED ===");
+                System.Diagnostics.Debug.WriteLine($"From: '{_currentSelectedExchange}' -> To: '{selectedExchange}'");
+                
+                // Save current API key before switching
+                if (!string.IsNullOrEmpty(_currentSelectedExchange))
+                {
+                    var currentApiKey = ApiKeyTextBox.Text.Trim();
+                    _configuration.ExchangeApiKeys ??= new Dictionary<string, string>();
+                        
+                    if (!string.IsNullOrEmpty(currentApiKey))
+                    {
+                        _configuration.ExchangeApiKeys[_currentSelectedExchange] = currentApiKey;
+                        System.Diagnostics.Debug.WriteLine($"Saved API key for {_currentSelectedExchange}");
+                    }
+                    else if (_configuration.ExchangeApiKeys.ContainsKey(_currentSelectedExchange))
+                    {
+                        _configuration.ExchangeApiKeys.Remove(_currentSelectedExchange);
+                        System.Diagnostics.Debug.WriteLine($"Removed API key for {_currentSelectedExchange}");
+                    }
+                }
+                
+                // CRITICAL FIX: Update the configuration object immediately!
+                _currentSelectedExchange = selectedExchange;
+                _configuration.SelectedExchangeApi = selectedExchange; // <- This was missing!
+                
+                System.Diagnostics.Debug.WriteLine($"Updated configuration.SelectedExchangeApi = '{_configuration.SelectedExchangeApi}'");
+                
+                // Update API key label dynamically
+                UpdateApiKeyLabel(selectedExchange);
+                
+                // Load API key for the newly selected exchange
+                LoadApiKeyForExchange(selectedExchange);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"ExchangeComboBox.SelectedItem is not string: {ExchangeComboBox.SelectedItem?.GetType()?.Name ?? "null"}");
+            }
+        }
+
+        private void UpdateApiKeyLabel(string exchangeName)
+        {
+            if (string.IsNullOrEmpty(exchangeName))
+                exchangeName = "Exchange";
+            
+            ApiKeyLabel.Text = $"{exchangeName} API Key (optional):";
         }
 
         private void RefreshIntervalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -130,6 +249,10 @@ namespace StockTicker
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"=== SAVE CONFIGURATION START ===");
+                System.Diagnostics.Debug.WriteLine($"Configuration.SelectedExchangeApi BEFORE final save: '{_configuration.SelectedExchangeApi}'");
+                System.Diagnostics.Debug.WriteLine($"_currentSelectedExchange: '{_currentSelectedExchange}'");
+                
                 // Temporarily disable the save button and show saving status
                 SaveButton.IsEnabled = false;
                 SaveButton.Content = "Saving...";
@@ -153,10 +276,37 @@ namespace StockTicker
 
                 _configuration.CryptoCurrencies = cryptos;
 
-                // Save API key (second field)
-                _configuration.CoinMarketCapApiKey = ApiKeyTextBox.Text.Trim();
+                // DOUBLE-CHECK: Ensure selected exchange is saved
+                if (string.IsNullOrEmpty(_currentSelectedExchange))
+                {
+                    MessageBox.Show("Please select a crypto exchange API.", 
+                                  "Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ResetSaveButton();
+                    return;
+                }
 
-                // Save refresh interval (third field)
+                // TRIPLE-CHECK: Force the exchange assignment
+                _configuration.SelectedExchangeApi = _currentSelectedExchange;
+                
+                System.Diagnostics.Debug.WriteLine($"FINAL ASSIGNMENT: Configuration.SelectedExchangeApi = '{_configuration.SelectedExchangeApi}'");
+
+                // Save API key for selected exchange (third field)
+                var apiKey = ApiKeyTextBox.Text.Trim();
+                _configuration.ExchangeApiKeys ??= new Dictionary<string, string>();
+
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    _configuration.ExchangeApiKeys[_currentSelectedExchange] = apiKey;
+                    System.Diagnostics.Debug.WriteLine($"Saved API key for {_currentSelectedExchange}");
+                }
+                else if (_configuration.ExchangeApiKeys.ContainsKey(_currentSelectedExchange))
+                {
+                    // Remove key if user cleared it
+                    _configuration.ExchangeApiKeys.Remove(_currentSelectedExchange);
+                    System.Diagnostics.Debug.WriteLine($"Removed API key for {_currentSelectedExchange}");
+                }
+
+                // Save refresh interval (fourth field)
                 if (string.IsNullOrWhiteSpace(RefreshIntervalTextBox.Text))
                 {
                     MessageBox.Show("Please specify a refresh interval in minutes (1-1440).", 
@@ -184,13 +334,22 @@ namespace StockTicker
                     return;
                 }
 
+                // SAVE THE CONFIGURATION TO FILE
+                System.Diagnostics.Debug.WriteLine($"About to save configuration with exchange: '{_configuration.SelectedExchangeApi}'");
                 ConfigurationService.SaveConfiguration(_configuration);
+                System.Diagnostics.Debug.WriteLine("Configuration saved to file successfully");
+                
+                // VERIFY what was actually saved by loading it back
+                var verifyConfig = ConfigurationService.LoadConfiguration();
+                System.Diagnostics.Debug.WriteLine($"VERIFICATION: File contains exchange: '{verifyConfig.SelectedExchangeApi}'");
+                System.Diagnostics.Debug.WriteLine($"=== SAVE CONFIGURATION END ===");
 
                 DialogResult = true;
                 Close();
             }
             catch (System.Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error saving configuration: {ex}");
                 MessageBox.Show($"Error saving configuration: {ex.Message}", 
                               "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ResetSaveButton();

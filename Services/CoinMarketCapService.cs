@@ -29,15 +29,20 @@ using Newtonsoft.Json;
 
 namespace StockTicker
 {
-    public class CoinMarketCapService
+    public class CoinMarketCapService : ICryptoExchangeService
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
+        private readonly ILoggingService _loggingService;
         private const string BaseUrl = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/";
 
-        public CoinMarketCapService(string apiKey = "")
+        public string ExchangeName => ExchangeInfo.CoinMarketCap;
+        public bool RequiresApiKey => true;
+
+        public CoinMarketCapService(string apiKey = "", ILoggingService loggingService = null)
         {
             _apiKey = apiKey;
+            _loggingService = loggingService;
             _httpClient = new HttpClient();
             
             if (!string.IsNullOrEmpty(_apiKey))
@@ -52,14 +57,21 @@ namespace StockTicker
             {
                 if (string.IsNullOrEmpty(_apiKey))
                 {
-                    // Return demo data if no API key is provided
-                    return GetDemoData(symbols);
+                    _loggingService?.LogError(ExchangeName, "No API key provided - CoinMarketCap requires API key");
+                    return GetErrorData(symbols);
                 }
+
+                _loggingService?.LogInfo(ExchangeName, $"Starting data fetch for {symbols.Count} symbols");
 
                 var symbolsString = string.Join(",", symbols);
                 var url = $"{BaseUrl}quotes/latest?symbol={symbolsString}&convert=USD";
 
+                _loggingService?.LogHttpRequest(ExchangeName, "GET", url);
+
                 var response = await _httpClient.GetStringAsync(url);
+                
+                _loggingService?.LogHttpResponse(ExchangeName, 200, $"{response.Length} bytes");
+
                 var apiResponse = JsonConvert.DeserializeObject<CoinMarketCapResponse>(response);
 
                 var cryptoList = new List<CryptoData>();
@@ -81,84 +93,93 @@ namespace StockTicker
                                 Change = quote.Price * (quote.PercentChange24h / 100),
                                 ChangePercent = quote.PercentChange24h,
                                 MarketCap = quote.MarketCap,
-                                Volume24h = quote.Volume24h
+                                Volume24h = quote.Volume24h,
+                                OpenPrice = 0, // Not available in CoinMarketCap API
+                                HighPrice = 0, // Not available in CoinMarketCap API
+                                LowPrice = 0, // Not available in CoinMarketCap API
+                                BidPrice = 0, // Not available in CoinMarketCap API
+                                AskPrice = 0, // Not available in CoinMarketCap API
+                                QuoteVolume = 0, // Not available in CoinMarketCap API
+                                LastUpdateTime = DateTime.Now,
+                                ExchangeName = ExchangeName,
+                                IsErrorState = false,
+                                IsNoDataState = false
                             });
+                            
+                            _loggingService?.LogInfo(ExchangeName, $"{symbol}: ${quote.Price:F2} ({quote.PercentChange24h:F2}%) - Data parsed successfully");
                         }
+                        else
+                        {
+                            _loggingService?.LogWarning(ExchangeName, $"{symbol}: Data exists but quote is null");
+                            cryptoList.Add(GetNoDataForSymbol(symbol));
+                        }
+                    }
+                    else
+                    {
+                        _loggingService?.LogWarning(ExchangeName, $"{symbol}: Symbol not found in API response");
+                        cryptoList.Add(GetNoDataForSymbol(symbol));
                     }
                 }
 
-                return cryptoList;
+                var successCount = cryptoList.Count(c => !c.IsErrorState && !c.IsNoDataState);
+                var errorCount = cryptoList.Count(c => c.IsErrorState);
+                var noDataCount = cryptoList.Count(c => c.IsNoDataState);
+                
+                _loggingService?.LogInfo(ExchangeName, $"Data fetch completed: {successCount} successful, {errorCount} errors, {noDataCount} no data");
+
+                return cryptoList.Count > 0 ? cryptoList : GetErrorData(symbols);
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _loggingService?.LogHttpError(ExchangeName, "quotes/latest", httpEx.Message);
+                return GetErrorData(symbols);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error fetching crypto data: {ex.Message}");
-                
-                // Return error data instead of demo data when API fails
+                _loggingService?.LogError(ExchangeName, $"API Error: {ex.Message}");
                 return GetErrorData(symbols);
             }
         }
 
-        private List<CryptoData> GetDemoData(List<string> symbols)
+        private CryptoData GetErrorDataForSymbol(string symbol)
         {
-            var random = new Random();
-            var demoData = new List<CryptoData>();
-
-            var predefinedPrices = new Dictionary<string, decimal>
+            return new CryptoData
             {
-                ["BTC"] = 43250.00m,
-                ["ETH"] = 2580.00m,
-                ["BNB"] = 315.50m,
-                ["XRP"] = 0.62m,
-                ["SOL"] = 98.75m,
-                ["ADA"] = 0.48m,
-                ["AVAX"] = 37.20m,
-                ["DOGE"] = 0.087m,
-                ["TRX"] = 0.105m,
-                ["DOT"] = 7.85m
+                Symbol = symbol,
+                Name = GetCryptoName(symbol),
+                Price = 0,
+                Change = 0,
+                ChangePercent = 0,
+                MarketCap = 0,
+                Volume24h = 0,
+                ExchangeName = ExchangeName,
+                LastUpdateTime = DateTime.Now,
+                IsErrorState = true,  // API threw an error
+                IsNoDataState = false
             };
+        }
 
-            foreach (var symbol in symbols)
+        private CryptoData GetNoDataForSymbol(string symbol)
+        {
+            return new CryptoData
             {
-                var basePrice = predefinedPrices.ContainsKey(symbol) ? predefinedPrices[symbol] : (decimal)(random.NextDouble() * 100);
-                var changePercent = (decimal)((random.NextDouble() - 0.5) * 10); // ±5% change
-                var change = basePrice * (changePercent / 100);
-
-                demoData.Add(new CryptoData
-                {
-                    Symbol = symbol,
-                    Name = GetCryptoName(symbol),
-                    Price = basePrice + change,
-                    Change = change,
-                    ChangePercent = changePercent,
-                    MarketCap = basePrice * (decimal)(random.NextDouble() * 1000000000),
-                    Volume24h = basePrice * (decimal)(random.NextDouble() * 10000000),
-                    IsErrorState = false
-                });
-            }
-
-            return demoData;
+                Symbol = symbol,
+                Name = GetCryptoName(symbol),
+                Price = 0,
+                Change = 0,
+                ChangePercent = 0,
+                MarketCap = 0,
+                Volume24h = 0,
+                ExchangeName = ExchangeName,
+                LastUpdateTime = DateTime.Now,
+                IsErrorState = false,
+                IsNoDataState = true  // No data received
+            };
         }
 
         private List<CryptoData> GetErrorData(List<string> symbols)
         {
-            var errorData = new List<CryptoData>();
-
-            foreach (var symbol in symbols)
-            {
-                errorData.Add(new CryptoData
-                {
-                    Symbol = symbol,
-                    Name = GetCryptoName(symbol),
-                    Price = 0, // Will display as "ERR"
-                    Change = 0,
-                    ChangePercent = 0, // Will display as "ERR%"
-                    MarketCap = 0,
-                    Volume24h = 0,
-                    IsErrorState = true // Flag to indicate error state
-                });
-            }
-
-            return errorData;
+            return symbols.Select(symbol => GetErrorDataForSymbol(symbol)).ToList();
         }
 
         private string GetCryptoName(string symbol)
@@ -186,7 +207,7 @@ namespace StockTicker
         }
     }
 
-    // API Response Models
+    // API Response Models remain the same
     public class CoinMarketCapResponse
     {
         [JsonProperty("data")]

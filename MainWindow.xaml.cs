@@ -31,19 +31,26 @@ namespace StockTicker
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
-        private DispatcherTimer _sizeCheckTimer;
-        private DispatcherTimer _scrollTimer;
+        private DispatcherTimer? _sizeCheckTimer;
+        private DispatcherTimer? _scrollTimer;
         private bool _isMouseOver = false;
         private double _contentWidth = 0;
         private double _optimalWidth = 0;
         private bool _shouldAutoScroll = false;
         private double _scrollSpeed = 30; // pixels per second
         private double _currentScrollPosition = 0;
+        private LogWindow? _logWindow;
+        private readonly ILoggingService _loggingService;
 
         public MainWindow()
         {
             InitializeComponent();
-            _viewModel = new MainViewModel();
+            
+            // Create logging service
+            _loggingService = new LoggingService();
+            
+            // Create view model with logging service
+            _viewModel = new MainViewModel(_loggingService);
             DataContext = _viewModel;
             
             // Timer to check scrollbar visibility and window sizing
@@ -265,20 +272,56 @@ namespace StockTicker
             await _viewModel.RefreshDataAsync();
         }
 
-        private async void Configure_Click(object sender, RoutedEventArgs e)
+		private async void Configure_Click(object sender, RoutedEventArgs e)
+		{
+			var currentExchange = _viewModel.Configuration.SelectedExchangeApi;
+			_loggingService.LogInfo("UI", $"=== OPENING CONFIGURATION WINDOW ===");
+			_loggingService.LogInfo("UI", $"Current exchange before config: '{currentExchange}'");
+			
+			var configWindow = new ConfigurationWindow(_viewModel.Configuration);
+			var dialogResult = configWindow.ShowDialog();
+			
+			_loggingService.LogInfo("UI", $"Configuration dialog result: {dialogResult}");
+			
+			if (dialogResult == true)
+			{
+				var newExchange = _viewModel.Configuration.SelectedExchangeApi;
+				_loggingService.LogInfo("UI", $"Configuration was saved. Exchange: '{currentExchange}' -> '{newExchange}'");
+				
+				// CRITICAL: Force ViewModel to reload configuration from file
+				_loggingService.LogInfo("UI", "FORCING configuration reload...");
+				_viewModel.LoadConfiguration();
+				
+				// Verify the change took effect
+				var actualExchange = _viewModel.Configuration.SelectedExchangeApi;
+				_loggingService.LogInfo("UI", $"After reload, exchange is: '{actualExchange}'");
+				
+				// Force immediate data refresh
+				_loggingService.LogInfo("UI", "FORCING data refresh...");
+				await _viewModel.RefreshDataAsync();
+				
+				// Update window size after content changes
+				Dispatcher.BeginInvoke(() => UpdateWindowSizeAndScrollbar(), DispatcherPriority.Background);
+				
+				_loggingService.LogInfo("UI", $"=== CONFIGURATION COMPLETE ===");
+			}
+			else
+			{
+				_loggingService.LogInfo("UI", "Configuration dialog was cancelled");
+			}
+		}
+
+
+        private void ShowLogs_Click(object sender, RoutedEventArgs e)
         {
-            var configWindow = new ConfigurationWindow(_viewModel.Configuration);
-            if (configWindow.ShowDialog() == true)
+            if (_logWindow == null)
             {
-                // Configuration was saved, reload and refresh data
-                _viewModel.LoadConfiguration();
-                
-                // Refresh data from API with new configuration
-                await _viewModel.RefreshDataAsync();
-                
-                // Update window size after content changes
-                Dispatcher.BeginInvoke(() => UpdateWindowSizeAndScrollbar(), DispatcherPriority.Background);
+                _logWindow = new LogWindow(_loggingService);
+                _logWindow.Owner = this;
             }
+
+            _logWindow.Show();
+            _logWindow.Activate();
         }
 
         private void About_Click(object sender, RoutedEventArgs e)
@@ -324,6 +367,7 @@ namespace StockTicker
         {
             _sizeCheckTimer?.Stop();
             _scrollTimer?.Stop();
+            _logWindow?.Close();
             base.OnClosed(e);
         }
     }

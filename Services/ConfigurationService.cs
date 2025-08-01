@@ -1,27 +1,11 @@
 /*
 Copyright (c) 2025 Hugo Monteiro
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Licensed under the MIT License. See LICENSE file in the project root for license information.
 */
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace StockTicker
@@ -38,10 +22,16 @@ namespace StockTicker
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"=== LOADING CONFIGURATION FROM: {ConfigFilePath} ===");
+                
                 if (File.Exists(ConfigFilePath))
                 {
                     var json = File.ReadAllText(ConfigFilePath);
+                    System.Diagnostics.Debug.WriteLine($"Raw JSON content: {json}");
+                    
                     var config = JsonSerializer.Deserialize<Configuration>(json) ?? new Configuration();
+                    
+                    System.Diagnostics.Debug.WriteLine($"Loaded exchange from file: '{config.SelectedExchangeApi}'");
                     
                     // Validate and fix refresh interval if needed
                     if (config.RefreshIntervalMinutes < 1 || config.RefreshIntervalMinutes > 1440)
@@ -50,7 +40,14 @@ namespace StockTicker
                         config.RefreshIntervalMinutes = 5; // Default to 5 minutes
                     }
                     
-                    System.Diagnostics.Debug.WriteLine($"Configuration loaded: {config.CryptoCurrencies.Count} cryptos, {config.RefreshIntervalMinutes}min refresh");
+                    // Validate exchange selection
+                    if (string.IsNullOrEmpty(config.SelectedExchangeApi) || !ExchangeInfo.Exchanges.Contains(config.SelectedExchangeApi))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Invalid exchange '{config.SelectedExchangeApi}' found in config, using default");
+                        config.SelectedExchangeApi = ExchangeInfo.CoinMarketCap;
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Final validated exchange: '{config.SelectedExchangeApi}'");
                     return config;
                 }
             }
@@ -67,8 +64,11 @@ namespace StockTicker
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"=== SAVING CONFIGURATION TO: {ConfigFilePath} ===");
+                System.Diagnostics.Debug.WriteLine($"Exchange to save: '{configuration.SelectedExchangeApi}'");
+                
                 var directory = Path.GetDirectoryName(ConfigFilePath);
-                if (!Directory.Exists(directory))
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
@@ -78,8 +78,16 @@ namespace StockTicker
                     WriteIndented = true
                 });
 
+                System.Diagnostics.Debug.WriteLine($"JSON to write: {json}");
+                
                 File.WriteAllText(ConfigFilePath, json);
-                System.Diagnostics.Debug.WriteLine($"Configuration saved: {configuration.CryptoCurrencies.Count} cryptos, {configuration.RefreshIntervalMinutes}min refresh, API key: {(!string.IsNullOrEmpty(configuration.CoinMarketCapApiKey) ? "SET" : "EMPTY")}");
+                
+                System.Diagnostics.Debug.WriteLine($"Configuration saved successfully");
+                
+                // Verify the save worked
+                var verifyJson = File.ReadAllText(ConfigFilePath);
+                System.Diagnostics.Debug.WriteLine($"File verification - content: {verifyJson}");
+                
             }
             catch (Exception ex)
             {
