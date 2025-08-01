@@ -272,52 +272,52 @@ namespace StockTicker
             await _viewModel.RefreshDataAsync();
         }
 
-		private async void Configure_Click(object sender, RoutedEventArgs e)
-		{
-			var currentExchange = _viewModel.Configuration.SelectedExchangeApi;
-			_loggingService.LogInfo("UI", $"=== OPENING CONFIGURATION WINDOW ===");
-			_loggingService.LogInfo("UI", $"Current exchange before config: '{currentExchange}'");
-			
-			var configWindow = new ConfigurationWindow(_viewModel.Configuration);
-			var dialogResult = configWindow.ShowDialog();
-			
-			_loggingService.LogInfo("UI", $"Configuration dialog result: {dialogResult}");
-			
-			if (dialogResult == true)
-			{
-				var newExchange = _viewModel.Configuration.SelectedExchangeApi;
-				_loggingService.LogInfo("UI", $"Configuration was saved. Exchange: '{currentExchange}' -> '{newExchange}'");
-				
-				// CRITICAL: Force ViewModel to reload configuration from file
-				_loggingService.LogInfo("UI", "FORCING configuration reload...");
-				_viewModel.LoadConfiguration();
-				
-				// Verify the change took effect
-				var actualExchange = _viewModel.Configuration.SelectedExchangeApi;
-				_loggingService.LogInfo("UI", $"After reload, exchange is: '{actualExchange}'");
-				
-				// Force immediate data refresh
-				_loggingService.LogInfo("UI", "FORCING data refresh...");
-				await _viewModel.RefreshDataAsync();
-				
-				// Update window size after content changes
-				Dispatcher.BeginInvoke(() => UpdateWindowSizeAndScrollbar(), DispatcherPriority.Background);
-				
-				_loggingService.LogInfo("UI", $"=== CONFIGURATION COMPLETE ===");
-			}
-			else
-			{
-				_loggingService.LogInfo("UI", "Configuration dialog was cancelled");
-			}
-		}
-
+        private async void Configure_Click(object sender, RoutedEventArgs e)
+        {
+            var currentExchange = _viewModel.Configuration.SelectedExchangeApi;
+            _loggingService.LogInfo("UI", $"=== OPENING CONFIGURATION WINDOW ===");
+            _loggingService.LogInfo("UI", $"Current exchange before config: '{currentExchange}'");
+            
+            var configWindow = new ConfigurationWindow(_viewModel.Configuration);
+            var dialogResult = configWindow.ShowDialog();
+            
+            _loggingService.LogInfo("UI", $"Configuration dialog result: {dialogResult}");
+            
+            if (dialogResult == true)
+            {
+                var newExchange = _viewModel.Configuration.SelectedExchangeApi;
+                _loggingService.LogInfo("UI", $"Configuration was saved. Exchange: '{currentExchange}' -> '{newExchange}'");
+                
+                // CRITICAL: Force ViewModel to reload configuration from file
+                _loggingService.LogInfo("UI", "FORCING configuration reload...");
+                _viewModel.LoadConfiguration();
+                
+                // Verify the change took effect
+                var actualExchange = _viewModel.Configuration.SelectedExchangeApi;
+                _loggingService.LogInfo("UI", $"After reload, exchange is: '{actualExchange}'");
+                
+                // Force immediate data refresh
+                _loggingService.LogInfo("UI", "FORCING data refresh...");
+                await _viewModel.RefreshDataAsync();
+                
+                // Update window size after content changes
+                Dispatcher.BeginInvoke(() => UpdateWindowSizeAndScrollbar(), DispatcherPriority.Background);
+                
+                _loggingService.LogInfo("UI", $"=== CONFIGURATION COMPLETE ===");
+            }
+            else
+            {
+                _loggingService.LogInfo("UI", "Configuration dialog was cancelled");
+            }
+        }
 
         private void ShowLogs_Click(object sender, RoutedEventArgs e)
         {
             if (_logWindow == null)
             {
                 _logWindow = new LogWindow(_loggingService);
-                _logWindow.Owner = this;
+                // Don't set Owner so it can go behind other applications
+                // _logWindow.Owner = this;  // Removed to prevent topmost behavior
             }
 
             _logWindow.Show();
