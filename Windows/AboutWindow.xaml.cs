@@ -27,10 +27,12 @@ namespace StockTicker
 {
     public partial class AboutWindow : Window
     {
-        public AboutWindow()
-        {
-            InitializeComponent();
-        }
+        public AboutWindow(string versionText)
+		{
+			InitializeComponent();
+			VersionTextBlock.Text = $"Version: {versionText}";
+			this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+		}
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {

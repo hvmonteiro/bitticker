@@ -1,0 +1,7 @@
+{
+"CryptoCurrencies": ["BTC", "ETH", "BNB"],
+"WindowLeft": 100,
+"WindowTop": 100,
+"WindowWidth": 800,
+"CoinMarketCapApiKey": "your-api-key-here"
+}

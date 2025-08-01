@@ -71,6 +71,33 @@ namespace StockTicker
                 }
             });
         }
+		
+		private void ExportButton_Click(object sender, RoutedEventArgs e)
+		{
+			var dlg = new Microsoft.Win32.SaveFileDialog
+			{
+				FileName = $"BitTicker_Log_{DateTime.Now:yyyyMMdd_HHmmss}.txt",
+				Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*"
+			};
+
+			if (dlg.ShowDialog() == true)
+			{
+				try
+				{
+					using var writer = new System.IO.StreamWriter(dlg.FileName);
+					foreach(var entry in LogEntries)
+					{
+						writer.WriteLine(entry.FormattedMessage);
+					}
+					MessageBox.Show("Log exported successfully.", "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show($"Failed to export log: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+			}
+		}
+
 
         private void UpdateStatus()
         {

@@ -1,6 +1,7 @@
 # BitTicker
 
-A real-time cryptocurrency ticker application for Windows, displaying live prices and market data from CoinMarketCap API.
+BitTicker is a lightweight and customizable cryptocurrency price ticker for Windows.
+It supports multiple major exchanges, real-time price updates, dark mode, and a clean, unobtrusive UI.
 
 ![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker.png?raw=true)
 
@@ -10,12 +11,11 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 
 ### Core Features
 
-- **Real-time cryptocurrency prices** from CoinMarketCap API with customizable refresh interval
+- **Real-time cryptocurrency prices** from multiple major exchanges with customizable refresh interval
 - **Customizable cryptocurrency selection** - Configure which cryptos to display
 - **Always-on-top window** that stays visible above other applications
 - **Instant manual refresh** - Right-click → Refresh for immediate data updates
 - **Auto-refresh on configuration** - Data automatically updates when settings change
-- **Demo mode support** - Works without API key using realistic simulated data
 
 ### Smart Interface Design
 
@@ -26,14 +26,20 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 - **Precision dragging** - Window  moves when clicking directly on ticker content
 - **Width-only resizing** - Drag bottom-right corner to adjust width
 - **Color-coded price changes** - Green for gains, Red for losses with percentage display
-
-### Advanced Scrolling & Navigation
-
+- **Highlight API Errors** - Error states highlight cryptos with issues (e.g., API failures or missing data)
 - **Smart scrollbar visibility** - Only appears on mouse hover when content overflows
-- **Horizontal scrolling** - Manual scroll control when mouse is over window
-- **Automatic ticker scrolling** - Continuous left scroll when window is narrower than content
 - **Smooth animations** - 20 FPS scrolling for fluid movement
-
+- **Advanced Configuration UI:**
+  - Choose exchange and input API keys where required
+  - Set refresh interval (with input validation)
+- **Detailed Tooltips:**
+  - Real-time price, volume, 24h high/low, bid/ask, and more
+  - Clear visual indicators for price changes
+- **Robust Logging and Debugging:**
+  - Log window with detailed informational, warning, and error messages
+  - Log export button for saving logs to a text file
+  - Logs automatically scroll to latest entry, with toggle option
+  
 ### User Experience
 
 - **Right-click context menu** with intuitive menu:
@@ -51,6 +57,20 @@ A real-time cryptocurrency ticker application for Windows, displaying live price
 - **User-controlled width** - Respects manual window resizing preferences
 
 ![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-configuration.png?raw=true)
+
+### Support for 12 Major Cryptocurrency Exchanges
+  - CoinMarketCap (requires API key)
+  - Binance
+  - Bitfinex
+  - Bitstamp
+  - ByBit (new!)
+  - Coinbase
+  - Crypto.com
+  - Gate.io
+  - Huobi
+  - Kraken
+  - KuCoin
+  - OKX
 
 ## Prerequisites
 
@@ -236,7 +256,7 @@ Settings are stored in: `%AppData%\StockTicker\config.json`
 - Check network connectivity to CoinMarketCap API
 - Verify API key hasn't exceeded rate limits
 
-## API Rate Limits
+## API Rate Limits for CoinMarketCap
 
 ### Free Tier (No API Key)
 

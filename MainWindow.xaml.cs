@@ -324,11 +324,13 @@ namespace StockTicker
             _logWindow.Activate();
         }
 
-        private void About_Click(object sender, RoutedEventArgs e)
-        {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.ShowDialog();
-        }
+		private void About_Click(object sender, RoutedEventArgs e)
+		{
+			var versionText = GetVersionText();
+			var about = new AboutWindow(versionText);
+			about.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+			about.ShowDialog();
+		}
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
@@ -370,5 +372,34 @@ namespace StockTicker
             _logWindow?.Close();
             base.OnClosed(e);
         }
+		
+		private string GetVersionText()
+		{
+			// Obtain version from GitHub Actions environment variables or assembly info.
+			// Assume that an environment variable BUILD_BRANCH and BUILD_TAG are set during CI build.
+
+			string branch = Environment.GetEnvironmentVariable("GITHUB_REF") ?? "";
+			string tag = Environment.GetEnvironmentVariable("GITHUB_REF_NAME") ?? "";
+
+			// branch example: refs/heads/main, refs/heads/feature-xyz
+			bool isMainBranch = branch.EndsWith("/main");
+
+			// Fallback: obtain assembly version
+			string assemblyVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+
+			if (isMainBranch)
+			{
+				// If on main branch, show the version with (dev)
+				return $"{assemblyVersion} (dev)";
+			}
+			else if (!string.IsNullOrEmpty(tag))
+			{
+				// If on a tagged branch, show the tag as version
+				return tag;
+			}
+
+			// Fallback
+			return assemblyVersion;
+		}
     }
 }

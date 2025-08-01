@@ -5,6 +5,43 @@ All notable changes to the BitTicker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-08-01
+
+### Added
+
+- Added **ByBit** exchange support with full API integration.
+- Added **export logs** functionality in the log window for saving detailed debug output.
+- Enhanced **configuration window** with alphabetically sorted exchange selection dropdown.
+- Added explicit **dark mode styling** fixes for dropdown list backgrounds and foregrounds.
+- Both **Configuration** and **Log** windows now open centered on the desktop.
+- Added dynamic version display in **About** dialog:
+  - Shows git branch/tag info from build environment.
+  - Appends "(dev)" suffix for builds on the main branch.
+- Added complete API implementations and error handling for **Huobi**, **OKX**, **Gate.io**, and **KuCoin**.
+- Refined ticker window behavior:
+  - Auto-scrolls when content overflows.
+  - Smooth size adjustments with user-resize persistence.
+  - Ticker window remains always on top; config and log windows do not.
+
+### Fixed
+
+- Fixed issue with configuration change not applying immediately by forcing service recreation.
+- Fixed selection dropdown contrast issues on dark themes.
+- Corrected various API implementations with up-to-date endpoints and data structures.
+- Removed deprecated exchanges (e.g., **Bittrex**) and updated repository accordingly.
+- Improved logging messages for better debugging and diagnostics.
+
+### Security
+
+- Updated GitHub Actions workflows to ensure proper authorization for releases and artifact uploads.
+
+### Miscellaneous
+
+- Added support for drag-moving the ticker window.
+- Improved tooltip content consistency across exchanges.
+
+---
+
 ## [1.0.1] - 2025-07-31
 
 ### Added
