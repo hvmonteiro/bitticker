@@ -41,8 +41,8 @@ jobs:
       
     - name: Publish application
       run: |
-        dotnet publish --configuration Release --self-contained true --runtime win-x64 -p::Version=${{ github.ref_name }} -p::AssemblyVersion=${{ github.ref_name }}.0 -p::FileVersion=${{ github.ref_name }}.0 -p::PublishSingleFile=true -p::IncludeAllContentForSelfExtract=true -p:PublishSingleFile=true --output ./publish/win-x64
-        dotnet publish --configuration Release -p::Version=${{ github.ref_name }} -p::AssemblyVersion=${{ github.ref_name }}.0 -p::FileVersion=${{ github.ref_name }}.0 --no-self-contained --output ./publish/portable 
+        dotnet publish --configuration Release --self-contained true --runtime win-x64 -p:Version=${{ github.ref_name }} -p:AssemblyVersion=${{ github.ref_name }}.0 -p:FileVersion=${{ github.ref_name }}.0 -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:PublishSingleFile=true --output ./publish/win-x64
+        dotnet publish --configuration Release -p:Version=${{ github.ref_name }} -p:AssemblyVersion=${{ github.ref_name }}.0 -p:FileVersion=${{ github.ref_name }}.0 --no-self-contained --output ./publish/portable 
 
         
     - name: Create release packages
