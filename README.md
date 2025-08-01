@@ -3,12 +3,16 @@
 BitTicker is a lightweight and customizable cryptocurrency price ticker for Windows.
 It supports multiple major exchanges, real-time price updates, dark mode, and a clean, unobtrusive UI.
 
-![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker.png?raw=true)
 
+![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-icon-48.png?raw=true)
+
+  
+![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker.png?raw=true)
+  
 
 
 ## Features
-
+  
 ### Core Features
 
 - **Real-time cryptocurrency prices** from multiple major exchanges with customizable refresh interval
@@ -32,13 +36,21 @@ It supports multiple major exchanges, real-time price updates, dark mode, and a 
 - **Advanced Configuration UI:**
   - Choose exchange and input API keys where required
   - Set refresh interval (with input validation)
+  
+    ![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-configuration.png?raw=true)
+  
 - **Detailed Tooltips:**
   - Real-time price, volume, 24h high/low, bid/ask, and more
   - Clear visual indicators for price changes
+    
+    ![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-tooltip.png?raw=true)
+  
 - **Robust Logging and Debugging:**
   - Log window with detailed informational, warning, and error messages
   - Log export button for saving logs to a text file
   - Logs automatically scroll to latest entry, with toggle option
+  
+    ![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-log-messages.png?raw=true)
   
 ### User Experience
 
@@ -51,12 +63,11 @@ It supports multiple major exchanges, real-time price updates, dark mode, and a 
 ### Configuration & Customization
 
 - **CoinMarketCap API integration** - Use your own API key for real data
+- **Top World Exchange API integration** - Use your own API key for real data
 - **Persistent settings** - Remembers window position, size, and selected cryptocurrencies
 - **Flexible cryptocurrency input** - Comma-separated symbols (e.g., BTC,ETH,BNB)
 - **Window position memory** - Restores last position and size on startup
 - **User-controlled width** - Respects manual window resizing preferences
-
-![BitTicker](https://github.com/hvmonteiro/bitticker/blob/main/images/bitticker-configuration.png?raw=true)
 
 ### Support for 12 Major Cryptocurrency Exchanges
   - CoinMarketCap (requires API key)
@@ -132,9 +143,9 @@ It supports multiple major exchanges, real-time price updates, dark mode, and a 
 
 ## Configuration
 
-### API Key Setup (Recommended)
+### API Key Setup
 
-1. Get a free API key from [CoinMarketCap API](https://coinmarketcap.com/api/)
+1. Get a API keys from your favourite exchange or from [CoinMarketCap API](https://coinmarketcap.com/api/)
 2. Right-click the ticker window → **Configure**
 3. Enter your API key in the configuration dialog
 4. Save settings
@@ -270,26 +281,6 @@ Settings are stored in: `%AppData%\BitTicker\config.json`
 - Check network connectivity to CoinMarketCap API
 - Verify API key hasn't exceeded rate limits
 
-## API Rate Limits for CoinMarketCap
-
-### Free Tier (No API Key)
-
-- Uses demo data only
-- No rate limits
-- Simulated price changes
-
-### CoinMarketCap Free Plan
-
-- 333 calls/day
-- 10,000 calls/month
-- Updates every 5 minutes = ~288 calls/day
-
-### CoinMarketCap Paid Plans
-
-- Higher rate limits available
-- Real-time data options
-- Professional features
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -305,16 +296,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **CoinMarketCap** for providing cryptocurrency data API
 - **Microsoft** for .NET and WPF framework
 - **Newtonsoft.Json** for JSON serialization
-
-## Version History
-
-### v1.0.0 (2025-07-31)
-
-- Initial release
-- Real-time cryptocurrency ticker
-- CoinMarketCap API integration
-- Configurable interface
-- Persistent settings
 
 ---
 
