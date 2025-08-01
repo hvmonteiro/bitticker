@@ -1,5 +1,7 @@
 @echo off
 
+set DOTNET_CLI_TELEMETRY_OPTOUT=1
+
 REM Check if a parameter was provided
 IF "%~1"=="" (
     echo.
@@ -41,7 +43,22 @@ echo Version provided: %VERSION%
 
 set GITHUB_REF=%VERSION%
 set GITHUB_REF_NAME=%VERSION%
-dotnet publish -c %VERSION% --runtime win-x64 --self-contained
-REM echo Build available in bin\Debug\net6.0-windows
+
+REM dotnet dev-certs https --trust
+echo Cleaning build environment...
+echo.
+dotnet clean
+echo.
+echo Creating new build version...
+echo.
+dotnet publish --configuration Release -r win-x64 --self-contained true /p:Version=%VERSION% /p:AssemblyVersion=%VERSION%.0 /p:FileVersion=%VERSION%.0 /p:PublishSingleFile=true /p:IncludeAllContentForSelfExtract=true
+
+echo.
+echo Creating ZIP package...
+del /F BitTicker-v%VERSION%-win-x64.zip >nul 2>nul
+tar.exe acf BitTicker-v%VERSION%-win-x64.zip -C bin/Release/net6.0-windows/win-x64/publish *
+echo.
+echo Build available as a ZIP Package: BitTicker-v%VERSION%-win-x64.zip
+
 
 exit /b 0

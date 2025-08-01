@@ -34,15 +34,16 @@ jobs:
       
     - name: Build application
       run: dotnet build --configuration Release --no-restore
-      
+
     - name: Run tests (if any)
       run: dotnet test --no-build --configuration Release --verbosity normal
       continue-on-error: true
       
     - name: Publish application
       run: |
-        dotnet publish --configuration Release --output ./publish/win-x64 --self-contained true --runtime win-x64 -p:PublishSingleFile=true
-        dotnet publish --configuration Release --output ./publish/portable --no-self-contained
+        dotnet publish --configuration Release --self-contained true --runtime win-x64 -p::Version=${{ github.ref_name }} -p::AssemblyVersion=${{ github.ref_name }}.0 -p::FileVersion=${{ github.ref_name }}.0 -p::PublishSingleFile=true -p::IncludeAllContentForSelfExtract=true -p:PublishSingleFile=true --output ./publish/win-x64
+        dotnet publish --configuration Release -p::Version=${{ github.ref_name }} -p::AssemblyVersion=${{ github.ref_name }}.0 -p::FileVersion=${{ github.ref_name }}.0 --no-self-contained --output ./publish/portable 
+
         
     - name: Create release packages
       run: |
@@ -55,23 +56,7 @@ jobs:
         cd publish/portable
         Compress-Archive -Path * -DestinationPath ../../BitTicker-portable-${{ github.ref_name }}.zip
         cd ../..
-        
-    - name: Generate changelog
-      id: changelog
-      run: |
-        echo "## What's Changed in ${{ github.ref_name }}" > CHANGELOG.md
-        echo "" >> CHANGELOG.md
-        echo "### Features" >> CHANGELOG.md
-        echo "- Complete cryptocurrency ticker with 12 major exchanges" >> CHANGELOG.md
-        echo "- Real-time price monitoring with tooltips" >> CHANGELOG.md
-        echo "- Dark theme UI with customizable settings" >> CHANGELOG.md
-        echo "- Auto-scrolling ticker with manual override" >> CHANGELOG.md
-        echo "- Comprehensive logging and debugging" >> CHANGELOG.md
-        echo "" >> CHANGELOG.md
-        echo "### Supported Exchanges" >> CHANGELOG.md
-        echo "- CoinMarketCap, Binance, Bitfinex, Bitstamp, ByBit" >> CHANGELOG.md
-        echo "- Coinbase, Crypto.com, Gate.io, Huobi, Kraken, KuCoin, OKX" >> CHANGELOG.md
-        
+              
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
@@ -87,9 +72,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: BitTicker-builds
         path: |
           BitTicker-*.zip
-          CHANGELOG.md

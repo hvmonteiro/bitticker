@@ -104,16 +104,30 @@ It supports multiple major exchanges, real-time price updates, dark mode, and a 
    dotnet restore
    ```
 
-4. Build the application:
+4. Run the application:
    
+   ```
+   run.bat
+   ```
+   or
+   ```
+   dotnet run
+   ```
+
+5. Build the application:
+   
+   ```
+   build.bat
+   ```
+   or   
    ```
    dotnet build --configuration Release
    ```
 
-5. Run the application:
+6. Build and Release the application:
    
    ```
-   dotnet run
+   buidl-release.bat <version number>
    ```
 
 ## Configuration
